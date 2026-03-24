@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const dogtasApi = require('../utils/dogtas-api');
 const prim = require('../utils/prim-hesap');
+const supabaseAdmin = require('../utils/supabase-admin');
 
 // POST /api/hesapla
-// Body: { yil, ceyrek, hedefler: { "1": 5000000, "2": 6000000, "3": 7000000 } }
 router.post('/', async (req, res) => {
   try {
     const { yil, ceyrek, hedefler } = req.body;
@@ -12,6 +12,34 @@ router.post('/', async (req, res) => {
     if (!yil || !ceyrek || !hedefler) {
       return res.status(400).json({ hata: 'yil, ceyrek ve hedefler gerekli' });
     }
+
+    const kullaniciId = req.kullanici.rol === 'admin' && req.body.kullanici_id
+      ? req.body.kullanici_id
+      : req.kullanici.id;
+
+    // Kullanıcının Dogtas API bilgilerini getir
+    const { data: profil, error: profilErr } = await supabaseAdmin
+      .from('kullanicilar')
+      .select('dogtas_musteri_no, dogtas_kullanici_adi, dogtas_sifre, dogtas_client_id, dogtas_client_secret, dogtas_uygulama_kodu')
+      .eq('id', kullaniciId)
+      .single();
+
+    if (profilErr || !profil) {
+      return res.status(400).json({ hata: 'Kullanıcı bilgileri bulunamadı' });
+    }
+
+    if (!profil.dogtas_kullanici_adi || !profil.dogtas_sifre) {
+      return res.status(400).json({ hata: 'Dogtas API bilgileri tanımlanmamış' });
+    }
+
+    const kimlikBilgileri = {
+      musteriNo: profil.dogtas_musteri_no,
+      kullaniciAdi: profil.dogtas_kullanici_adi,
+      sifre: profil.dogtas_sifre,
+      clientId: profil.dogtas_client_id,
+      clientSecret: profil.dogtas_client_secret,
+      uygulamaKodu: profil.dogtas_uygulama_kodu
+    };
 
     const quarterNum = Number(ceyrek.replace('Q', ''));
     const months = prim.getQuarterMonths(quarterNum);
@@ -22,14 +50,13 @@ router.post('/', async (req, res) => {
     }
 
     // API tarih aralığı: Fatura verileri için 1 yıl geriye git
-    // (Önceki çeyreklerde sipariş verilip bu çeyrekte faturalanan kayıtlar için)
     const extendedStart = new Date(dates.start);
     extendedStart.setFullYear(extendedStart.getFullYear() - 1);
     const startStr = formatDateDDMMYYYY(extendedStart);
     const endStr = formatDateDDMMYYYY(dates.end);
 
-    // Doğtaş API'den veri çek
-    const rawData = await dogtasApi.fetchData(startStr, endStr);
+    // Dogtas API'den veri çek
+    const rawData = await dogtasApi.fetchData(startStr, endStr, kimlikBilgileri);
 
     // Hedef map oluştur
     const targetMap = {};
@@ -65,14 +92,13 @@ router.post('/', async (req, res) => {
       toplamPrim += result.premiumAmount;
     }
 
-    // Ek prim dilimlerini al (request body'den veya Supabase'den)
+    // Ek prim dilimlerini al
     let ekPrimTiers = req.body.ekPrimDilimleri || null;
     if (!ekPrimTiers) {
-      // Supabase'den çek
-      const supabase = require('../utils/supabase');
-      const { data: tiersData } = await supabase
+      const { data: tiersData } = await supabaseAdmin
         .from('ek_prim_dilimleri')
         .select('alt_sinir, prim_orani')
+        .eq('kullanici_id', kullaniciId)
         .eq('yil', Number(yil))
         .eq('ceyrek', ceyrek);
 

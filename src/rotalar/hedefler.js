@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const supabase = require('../utils/supabase');
+const supabaseAdmin = require('../utils/supabase-admin');
 
 // GET /api/hedefler?yil=2026&ceyrek=Q1
 router.get('/', async (req, res) => {
@@ -10,9 +10,14 @@ router.get('/', async (req, res) => {
       return res.status(400).json({ hata: 'yil ve ceyrek parametreleri gerekli' });
     }
 
-    const { data, error } = await supabase
+    const kullaniciId = req.kullanici.rol === 'admin' && req.query.kullanici_id
+      ? req.query.kullanici_id
+      : req.kullanici.id;
+
+    const { data, error } = await supabaseAdmin
       .from('hedefler')
       .select('*')
+      .eq('kullanici_id', kullaniciId)
       .eq('yil', Number(yil))
       .eq('ceyrek', ceyrek)
       .order('ay');
@@ -26,7 +31,6 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/hedefler
-// Body: { yil, ceyrek, hedefler: [{ ay, hedef_tutar }] }
 router.post('/', async (req, res) => {
   try {
     const { yil, ceyrek, hedefler } = req.body;
@@ -34,10 +38,15 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ hata: 'yil, ceyrek ve hedefler gerekli' });
     }
 
+    const kullaniciId = req.kullanici.rol === 'admin' && req.body.kullanici_id
+      ? req.body.kullanici_id
+      : req.kullanici.id;
+
     // Önce mevcut kayıtları sil
-    const { error: delErr } = await supabase
+    const { error: delErr } = await supabaseAdmin
       .from('hedefler')
       .delete()
+      .eq('kullanici_id', kullaniciId)
       .eq('yil', Number(yil))
       .eq('ceyrek', ceyrek);
 
@@ -45,13 +54,14 @@ router.post('/', async (req, res) => {
 
     // Yeni kayıtları ekle
     const rows = hedefler.map(h => ({
+      kullanici_id: kullaniciId,
       yil: Number(yil),
       ceyrek,
       ay: h.ay,
       hedef_tutar: h.hedef_tutar
     }));
 
-    const { error: insErr } = await supabase
+    const { error: insErr } = await supabaseAdmin
       .from('hedefler')
       .insert(rows);
 

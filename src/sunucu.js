@@ -13,18 +13,32 @@ uygulama.use(express.json());
 uygulama.use(express.static(path.join(__dirname, '../public')));
 
 // Rotalar
+const authRotalari = require('./rotalar/auth');
+const kullaniciRotalari = require('./rotalar/kullanicilar');
 const hedeflerRotalari = require('./rotalar/hedefler');
 const ekPrimRotalari = require('./rotalar/ek-prim');
 const hesaplamaRotalari = require('./rotalar/hesaplama');
 
-// Health check
+const { yetkilendirme, sadeceAdmin } = require('./middleware/yetkilendirme');
+
+// Health check (public)
 uygulama.get('/api/health', (req, res) => {
   res.json({ durum: 'aktif', zaman: new Date().toISOString() });
 });
 
-uygulama.use('/api/hedefler', hedeflerRotalari);
-uygulama.use('/api/ek-prim-dilimleri', ekPrimRotalari);
-uygulama.use('/api/hesapla', hesaplamaRotalari);
+// Auth rotaları (public)
+uygulama.use('/api/auth', authRotalari);
+
+// Korumalı rotalar (token gerekli)
+uygulama.use('/api/kullanicilar', yetkilendirme, sadeceAdmin, kullaniciRotalari);
+uygulama.use('/api/hedefler', yetkilendirme, hedeflerRotalari);
+uygulama.use('/api/ek-prim-dilimleri', yetkilendirme, ekPrimRotalari);
+uygulama.use('/api/hesapla', yetkilendirme, hesaplamaRotalari);
+
+// Giriş sayfası
+uygulama.get('/giris', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/giris.html'));
+});
 
 // SPA fallback
 uygulama.get('*', (req, res) => {

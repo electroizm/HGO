@@ -23,6 +23,12 @@ const VARSAYILAN_DILIMLER = [
 
 // === Başlangıç ===
 document.addEventListener('DOMContentLoaded', () => {
+  // Auth kontrolü
+  if (!authKontrol()) return;
+
+  // Kullanıcı bilgilerini göster
+  kullaniciBilgileriniGoster();
+
   baslatYillar();
   donemDegisti();
   tablariBagla();
@@ -30,6 +36,20 @@ document.addEventListener('DOMContentLoaded', () => {
   epBaslatYillar();
   epDonemDegisti();
 });
+
+// === Kullanıcı Bilgilerini Header'da Göster ===
+function kullaniciBilgileriniGoster() {
+  const kullanici = getKullanici();
+  if (!kullanici) return;
+
+  document.getElementById('user-name').textContent = kullanici.ad;
+  document.getElementById('user-role').textContent = kullanici.rol;
+
+  // Admin ise admin sekmesini göster
+  if (kullanici.rol === 'admin') {
+    document.getElementById('tab-btn-admin').classList.remove('hidden');
+  }
+}
 
 // === Tab Yönetimi ===
 function tablariBagla() {
@@ -39,6 +59,11 @@ function tablariBagla() {
       document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+
+      // Admin sekmesine geçince kullanıcıları yükle
+      if (tab.dataset.tab === 'admin') {
+        kullanicilariYukle();
+      }
     });
   });
 }
@@ -94,7 +119,8 @@ async function hedefleriYukle() {
   const ceyrek = document.getElementById('ceyrek').value;
 
   try {
-    const res = await fetch(`/api/hedefler?yil=${yil}&ceyrek=${ceyrek}`);
+    const res = await apiFetch(`/api/hedefler?yil=${yil}&ceyrek=${ceyrek}`);
+    if (!res) return;
     const data = await res.json();
 
     if (Array.isArray(data)) {
@@ -133,12 +159,12 @@ async function hedefleriKaydet() {
   }));
 
   try {
-    const res = await fetch('/api/hedefler', {
+    const res = await apiFetch('/api/hedefler', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ yil: Number(yil), ceyrek, hedefler })
     });
 
+    if (!res) return;
     const data = await res.json();
     if (data.basarili) {
       bildirimGoster('Hedefler kaydedildi', 'basarili');
@@ -171,12 +197,12 @@ async function hesapla() {
   document.getElementById('loading-text').textContent = "API'ye bağlanılıyor...";
 
   try {
-    const res = await fetch('/api/hesapla', {
+    const res = await apiFetch('/api/hesapla', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ yil: Number(yil), ceyrek, hedefler })
     });
 
+    if (!res) return;
     const data = await res.json();
 
     if (data.hata) {
@@ -291,7 +317,8 @@ async function epDonemDegisti() {
   const ceyrek = document.getElementById('ep-ceyrek').value;
 
   try {
-    const res = await fetch(`/api/ek-prim-dilimleri?yil=${yil}&ceyrek=${ceyrek}`);
+    const res = await apiFetch(`/api/ek-prim-dilimleri?yil=${yil}&ceyrek=${ceyrek}`);
+    if (!res) return;
     const data = await res.json();
 
     const tbody = document.getElementById('ep-tbody');
@@ -300,7 +327,6 @@ async function epDonemDegisti() {
     if (Array.isArray(data) && data.length > 0) {
       data.forEach(d => epSatirEkle(Number(d.alt_sinir), Number(d.prim_orani)));
     } else {
-      // Varsayılanları yükle (ilk seferlik)
       epVarsayilanlariYukle();
     }
   } catch {
@@ -345,12 +371,12 @@ async function epKaydet() {
   });
 
   try {
-    const res = await fetch('/api/ek-prim-dilimleri', {
+    const res = await apiFetch('/api/ek-prim-dilimleri', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ yil: Number(yil), ceyrek, dilimler })
     });
 
+    if (!res) return;
     const data = await res.json();
     if (data.basarili) {
       bildirimGoster('Ek prim dilimleri kaydedildi', 'basarili');
@@ -373,7 +399,6 @@ function formatSayi(n) {
 
 function parseSayi(str) {
   if (!str) return 0;
-  // Türkçe format: 5.000.000 → 5000000
   const cleaned = String(str).replace(/\./g, '').replace(',', '.').trim();
   const n = Number(cleaned);
   return isNaN(n) ? 0 : n;

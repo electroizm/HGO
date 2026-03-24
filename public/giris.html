@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOĞTAŞ HGO - Giriş</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .giris-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .giris-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+    .giris-card h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    .giris-card .subtitle {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .giris-card .form-group {
+      margin-bottom: 16px;
+      min-width: 100%;
+    }
+    .giris-card .btn {
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px;
+    }
+    .giris-hata {
+      color: #dc2626;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-top: 12px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="giris-wrapper">
+    <div class="giris-card">
+      <h1>DOĞTAŞ HGO</h1>
+      <p class="subtitle">Prim Hesaplama Sistemi</p>
+      <form id="giris-form">
+        <div class="form-group">
+          <label for="eposta">E-posta</label>
+          <input type="email" id="eposta" placeholder="ornek@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="sifre">Şifre</label>
+          <input type="password" id="sifre" placeholder="Şifreniz" required>
+        </div>
+        <button type="submit" class="btn btn-primary" id="giris-btn">Giriş Yap</button>
+        <p class="giris-hata" id="giris-hata"></p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Zaten giriş yapılmışsa yönlendir
+    if (localStorage.getItem('hgo_token')) {
+      window.location.href = '/';
+    }
+
+    document.getElementById('giris-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('giris-btn');
+      const hataEl = document.getElementById('giris-hata');
+      hataEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Giriş yapılıyor...';
+
+      try {
+        const res = await fetch('/api/auth/giris', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            eposta: document.getElementById('eposta').value,
+            sifre: document.getElementById('sifre').value
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.hata || 'Giriş başarısız');
+        }
+
+        localStorage.setItem('hgo_token', data.token);
+        localStorage.setItem('hgo_kullanici', JSON.stringify(data.kullanici));
+        window.location.href = '/';
+      } catch (err) {
+        hataEl.textContent = err.message;
+        hataEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Giriş Yap';
+      }
+    });
+  </script>
+</body>
+</html>

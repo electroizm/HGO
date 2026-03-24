@@ -7,18 +7,86 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-info .user-name {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+    .user-info .user-role {
+      font-size: 0.7rem;
+      background: #3b82f6;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .btn-cikis {
+      background: none;
+      border: 1px solid #d1d5db;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      color: #6b7280;
+      cursor: pointer;
+    }
+    .btn-cikis:hover {
+      background: #f3f4f6;
+      color: #dc2626;
+      border-color: #dc2626;
+    }
+    /* Admin panel */
+    .kullanici-liste { list-style: none; }
+    .kullanici-liste li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .kullanici-liste li:last-child { border-bottom: none; }
+    .kullanici-bilgi { flex: 1; }
+    .kullanici-bilgi .isim { font-weight: 600; }
+    .kullanici-bilgi .eposta { font-size: 0.8rem; color: #6b7280; }
+    .kullanici-bilgi .musteri-no { font-size: 0.8rem; color: #3b82f6; }
+    .badge-aktif { color: #16a34a; font-size: 0.75rem; font-weight: 600; }
+    .badge-pasif { color: #dc2626; font-size: 0.75rem; font-weight: 600; }
+    .admin-form .form-group { margin-bottom: 12px; }
+    .admin-form .form-row { margin-bottom: 0; }
+  </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>DOĞTAŞ HGO</h1>
-      <p class="subtitle">Hedef Gerçekleşme Oranı — Prim Hesaplama</p>
+      <div class="header-bar">
+        <div>
+          <h1>DOĞTAŞ HGO</h1>
+          <p class="subtitle">Hedef Gerçekleşme Oranı — Prim Hesaplama</p>
+        </div>
+        <div class="user-info">
+          <span class="user-name" id="user-name"></span>
+          <span class="user-role" id="user-role"></span>
+          <button class="btn-cikis" onclick="cikisYap()">Çıkış</button>
+        </div>
+      </div>
     </header>
 
     <!-- Tabs -->
     <div class="tabs">
       <button class="tab active" data-tab="hesaplama">Prim Hesaplama</button>
       <button class="tab" data-tab="ek-prim">EkPrim Ayarları</button>
+      <button class="tab hidden" data-tab="admin" id="tab-btn-admin">Kullanıcı Yönetimi</button>
     </div>
 
     <!-- TAB 1: Prim Hesaplama -->
@@ -153,10 +221,82 @@
       </div>
     </div>
 
+    <!-- TAB 3: Kullanıcı Yönetimi (Admin) -->
+    <div id="tab-admin" class="tab-content">
+      <div class="card">
+        <h2>Yeni Kullanıcı Ekle</h2>
+        <div class="admin-form" id="kullanici-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Ad</label>
+              <input type="text" id="k-ad" placeholder="Bayi Adı">
+            </div>
+            <div class="form-group">
+              <label>E-posta</label>
+              <input type="email" id="k-eposta" placeholder="ornek@email.com">
+            </div>
+            <div class="form-group">
+              <label>Şifre</label>
+              <input type="password" id="k-sifre" placeholder="Şifre">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Rol</label>
+              <select id="k-rol">
+                <option value="bayi">Bayi</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Müşteri No</label>
+              <input type="text" id="k-musteri-no" placeholder="CustomerNo">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>API Kullanıcı Adı</label>
+              <input type="text" id="k-api-user" placeholder="userName">
+            </div>
+            <div class="form-group">
+              <label>API Şifre</label>
+              <input type="password" id="k-api-pass" placeholder="password">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Client ID</label>
+              <input type="text" id="k-client-id" placeholder="clientId">
+            </div>
+            <div class="form-group">
+              <label>Client Secret</label>
+              <input type="password" id="k-client-secret" placeholder="clientSecret">
+            </div>
+            <div class="form-group">
+              <label>Uygulama Kodu</label>
+              <input type="text" id="k-app-code" placeholder="applicationCode">
+            </div>
+          </div>
+          <div class="button-row">
+            <button id="btn-kullanici-ekle" class="btn btn-primary">Kullanıcı Ekle</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Kullanıcılar</h2>
+        <ul class="kullanici-liste" id="kullanici-liste">
+          <!-- JS ile doldurulacak -->
+        </ul>
+      </div>
+    </div>
+
     <!-- Bildirim -->
     <div id="bildirim" class="bildirim hidden"></div>
   </div>
 
+  <script src="/js/auth.js"></script>
+  <script src="/js/admin.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>
