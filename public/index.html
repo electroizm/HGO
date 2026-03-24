@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOĞTAŞ HGO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>DOĞTAŞ HGO</h1>
+      <p class="subtitle">Hedef Gerçekleşme Oranı — Prim Hesaplama</p>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="hesaplama">Prim Hesaplama</button>
+      <button class="tab" data-tab="ek-prim">EkPrim Ayarları</button>
+    </div>
+
+    <!-- TAB 1: Prim Hesaplama -->
+    <div id="tab-hesaplama" class="tab-content active">
+      <!-- Dönem Seçimi -->
+      <div class="card">
+        <h2>Dönem Seçimi</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="yil">Yıl</label>
+            <select id="yil"></select>
+          </div>
+          <div class="form-group">
+            <label for="ceyrek">Çeyrek</label>
+            <select id="ceyrek">
+              <option value="Q1">Q1 (Ocak-Mart)</option>
+              <option value="Q2">Q2 (Nisan-Haziran)</option>
+              <option value="Q3">Q3 (Temmuz-Eylül)</option>
+              <option value="Q4">Q4 (Ekim-Aralık)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aylık Hedefler -->
+      <div class="card">
+        <h2>Aylık Hedefler</h2>
+        <div class="form-row" id="hedef-inputs">
+          <!-- JS ile doldurulacak -->
+        </div>
+        <div class="button-row">
+          <button id="btn-kaydet" class="btn btn-secondary">Hedefleri Kaydet</button>
+          <button id="btn-hesapla" class="btn btn-primary">Hesapla</button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <span id="loading-text">API'ye bağlanılıyor...</span>
+      </div>
+
+      <!-- Sonuçlar -->
+      <div id="sonuclar" class="hidden">
+        <!-- Kayıt Sayısı -->
+        <div class="card info-bar">
+          <span id="kayit-sayisi"></span>
+        </div>
+
+        <!-- Aylık Tablo -->
+        <div class="card">
+          <h2>Aylık Performans</h2>
+          <div class="table-wrapper">
+            <table id="sonuc-tablo">
+              <thead>
+                <tr>
+                  <th>Ay</th>
+                  <th>Hedef</th>
+                  <th>Sipariş</th>
+                  <th>HGO %</th>
+                  <th>Fatura</th>
+                  <th>Prim Oranı</th>
+                  <th>Prim Tutarı</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Çeyrek Özeti -->
+        <div class="card">
+          <h2>Çeyrek Özeti</h2>
+          <div class="ozet-grid" id="ceyrek-ozet">
+            <!-- JS ile doldurulacak -->
+          </div>
+        </div>
+
+        <!-- Toplam Prim -->
+        <div class="prim-total-box" id="toplam-prim-box">
+          <!-- JS ile doldurulacak -->
+        </div>
+
+        <!-- Forecast / Tahmin -->
+        <div class="card">
+          <h2>Tahmin & Öneriler</h2>
+          <div class="forecast-panel" id="forecast-panel">
+            <!-- JS ile doldurulacak -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: EkPrim Ayarları -->
+    <div id="tab-ek-prim" class="tab-content">
+      <div class="card">
+        <h2>Ek Prim Dilimleri</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ep-yil">Yıl</label>
+            <select id="ep-yil"></select>
+          </div>
+          <div class="form-group">
+            <label for="ep-ceyrek">Çeyrek</label>
+            <select id="ep-ceyrek">
+              <option value="Q1">Q1</option>
+              <option value="Q2">Q2</option>
+              <option value="Q3">Q3</option>
+              <option value="Q4">Q4</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table id="ep-tablo">
+            <thead>
+              <tr>
+                <th>Alt Sınır (TL)</th>
+                <th>Prim Oranı (%)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="ep-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="button-row">
+          <button id="btn-ep-satir-ekle" class="btn btn-secondary">+ Satır Ekle</button>
+          <button id="btn-ep-varsayilan" class="btn btn-secondary">Varsayılanları Yükle</button>
+          <button id="btn-ep-kaydet" class="btn btn-primary">Kaydet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bildirim -->
+    <div id="bildirim" class="bildirim hidden"></div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

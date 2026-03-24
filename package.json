@@ -1,0 +1,24 @@
+{
+  "name": "hgo-prim-hesaplama",
+  "version": "1.0.0",
+  "description": "Doğtaş Bayi HGO Prim Hesaplama Sistemi",
+  "main": "src/sunucu.js",
+  "scripts": {
+    "start": "node src/sunucu.js",
+    "dev": "node --watch src/sunucu.js"
+  },
+  "keywords": [
+    "dogtas",
+    "hgo",
+    "prim",
+    "hesaplama"
+  ],
+  "author": "İsmail Güneş",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.89.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "googleapis": "^171.4.0"
+  }
+}

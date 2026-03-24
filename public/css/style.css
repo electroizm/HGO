@@ -1,0 +1,440 @@
+/* === Reset & Base === */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f0f2f5;
+  color: #1a1a2e;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+/* === Header === */
+header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* === Tabs === */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  background: #fff;
+  color: #1a1a2e;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tab:hover:not(.active) {
+  color: #374151;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* === Cards === */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.card h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* === Forms === */
+.form-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 140px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: #1a1a2e;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* === Buttons === */
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-primary:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.btn-danger {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.btn-danger:hover {
+  background: #fecaca;
+}
+
+/* === Loading === */
+.loading {
+  text-align: center;
+  padding: 40px;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading span {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* === Table === */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+thead th {
+  background: #1e293b;
+  color: #fff;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+thead th:first-child {
+  border-radius: 6px 0 0 0;
+}
+
+thead th:last-child {
+  border-radius: 0 6px 0 0;
+}
+
+tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* HGO renk kodları */
+.hgo-green { color: #16a34a; font-weight: 700; }
+.hgo-orange { color: #ea580c; font-weight: 700; }
+.hgo-red { color: #dc2626; font-weight: 700; }
+
+/* === Çeyrek Özet Grid === */
+.ozet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.ozet-item {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+}
+
+.ozet-item .label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.ozet-item .value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+/* === Toplam Prim Box === */
+.prim-total-box {
+  background: #fff;
+  border: 2px solid #16a34a;
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.prim-total-box .label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.prim-total-box .total {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.prim-total-box .detail {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+/* === Forecast Panel === */
+.forecast-panel {
+  font-size: 0.88rem;
+  line-height: 1.8;
+  white-space: pre-line;
+  color: #374151;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'Inter', monospace;
+}
+
+/* === Info Bar === */
+.info-bar {
+  padding: 12px 20px;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* === Bildirim === */
+.bildirim {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transition: opacity 0.3s;
+}
+
+.bildirim.basarili {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.bildirim.hata {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* === EkPrim tablo input === */
+#ep-tablo input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+#ep-tablo input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+/* === Utility === */
+.hidden {
+  display: none !important;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* === Responsive === */
+@media (max-width: 640px) {
+  .container {
+    padding: 12px 10px;
+  }
+
+  header h1 {
+    font-size: 1.4rem;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-group {
+    min-width: 100%;
+  }
+
+  .ozet-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .prim-total-box .total {
+    font-size: 1.5rem;
+  }
+
+  .button-row {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  table {
+    font-size: 0.8rem;
+  }
+
+  thead th, tbody td {
+    padding: 8px 6px;
+  }
+}
