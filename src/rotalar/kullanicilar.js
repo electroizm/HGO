@@ -7,7 +7,7 @@ router.get('/', async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('kullanicilar')
-      .select('id, eposta, ad, rol, aktif, dogtas_musteri_no, dogtas_kullanici_adi, olusturma_tarihi')
+      .select('id, eposta, ad, rol, aktif, dogtas_musteri_no, olusturma_tarihi')
       .order('olusturma_tarihi', { ascending: false });
 
     if (error) throw error;
@@ -18,56 +18,36 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/kullanicilar/:id
-router.get('/:id', async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('kullanicilar')
-      .select('id, eposta, ad, rol, aktif, dogtas_musteri_no, dogtas_kullanici_adi, dogtas_client_id, dogtas_uygulama_kodu, olusturma_tarihi')
-      .eq('id', req.params.id)
-      .single();
-
-    if (error) throw error;
-    if (!data) return res.status(404).json({ hata: 'Kullanıcı bulunamadı' });
-    res.json(data);
-  } catch (err) {
-    console.error('Kullanıcı detay hatası:', err.message);
-    res.status(500).json({ hata: err.message });
-  }
-});
-
-// POST /api/kullanicilar
+// POST /api/kullanicilar — Admin sadece e-posta ile davet oluşturur
 router.post('/', async (req, res) => {
   try {
-    const { eposta, sifre, ad, rol, dogtas_musteri_no, dogtas_kullanici_adi, dogtas_sifre, dogtas_client_id, dogtas_client_secret, dogtas_uygulama_kodu } = req.body;
+    const { eposta } = req.body;
 
-    if (!eposta || !sifre || !ad) {
-      return res.status(400).json({ hata: 'E-posta, şifre ve ad gerekli' });
+    if (!eposta) {
+      return res.status(400).json({ hata: 'E-posta gerekli' });
     }
 
-    // Supabase Auth'da kullanıcı oluştur
+    // Geçici şifre ile Auth kullanıcısı oluştur (kullanıcı sonra değiştirecek)
+    const geciciSifre = `Temp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: eposta,
-      password: sifre,
+      password: geciciSifre,
       email_confirm: true
     });
 
     if (authError) throw authError;
 
-    // kullanicilar tablosuna profil ekle
+    // kullanicilar tablosuna profil ekle (bilgiler boş, kullanıcı dolduracak)
     const { data: profil, error: profilError } = await supabaseAdmin
       .from('kullanicilar')
       .insert({
         id: authData.user.id,
         eposta,
-        ad,
-        rol: rol || 'bayi',
-        dogtas_musteri_no: dogtas_musteri_no || null,
-        dogtas_kullanici_adi: dogtas_kullanici_adi || null,
-        dogtas_sifre: dogtas_sifre || null,
-        dogtas_client_id: dogtas_client_id || null,
-        dogtas_client_secret: dogtas_client_secret || null,
-        dogtas_uygulama_kodu: dogtas_uygulama_kodu || null
+        ad: eposta.split('@')[0],
+        rol: 'bayi',
+        aktif: true,
+        sifre_belirlendi: false
       })
       .select('id, eposta, ad, rol, aktif')
       .single();
@@ -81,21 +61,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/kullanicilar/:id
+// PUT /api/kullanicilar/:id — Admin: aktif/pasif + rol güncelleme
 router.put('/:id', async (req, res) => {
   try {
-    const { ad, rol, aktif, dogtas_musteri_no, dogtas_kullanici_adi, dogtas_sifre, dogtas_client_id, dogtas_client_secret, dogtas_uygulama_kodu } = req.body;
-
+    const { aktif, rol } = req.body;
     const updates = { guncelleme_tarihi: new Date().toISOString() };
-    if (ad !== undefined) updates.ad = ad;
-    if (rol !== undefined) updates.rol = rol;
     if (aktif !== undefined) updates.aktif = aktif;
-    if (dogtas_musteri_no !== undefined) updates.dogtas_musteri_no = dogtas_musteri_no;
-    if (dogtas_kullanici_adi !== undefined) updates.dogtas_kullanici_adi = dogtas_kullanici_adi;
-    if (dogtas_sifre !== undefined) updates.dogtas_sifre = dogtas_sifre;
-    if (dogtas_client_id !== undefined) updates.dogtas_client_id = dogtas_client_id;
-    if (dogtas_client_secret !== undefined) updates.dogtas_client_secret = dogtas_client_secret;
-    if (dogtas_uygulama_kodu !== undefined) updates.dogtas_uygulama_kodu = dogtas_uygulama_kodu;
+    if (rol !== undefined) updates.rol = rol;
 
     const { data, error } = await supabaseAdmin
       .from('kullanicilar')
@@ -112,7 +84,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/kullanicilar/:id (pasif yap)
+// DELETE /api/kullanicilar/:id — Pasif yap
 router.delete('/:id', async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOĞTAŞ HGO - Kayıt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .kayit-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .kayit-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+    .kayit-card h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    .kayit-card .subtitle {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .kayit-card .form-group {
+      margin-bottom: 14px;
+      min-width: 100%;
+    }
+    .kayit-card .btn {
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px;
+    }
+    .kayit-hata {
+      color: #dc2626;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-top: 12px;
+      display: none;
+    }
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #374151;
+      margin: 20px 0 12px;
+      padding-top: 16px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .kayit-link {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+    .kayit-link a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    .kayit-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="kayit-wrapper">
+    <div class="kayit-card">
+      <h1>DOĞTAŞ HGO</h1>
+      <p class="subtitle">Hesap Kurulumu</p>
+
+      <form id="kayit-form">
+        <div class="form-group">
+          <label for="eposta">E-posta (davet edilen)</label>
+          <input type="email" id="eposta" placeholder="Admin tarafından size verilen e-posta" required>
+        </div>
+
+        <div class="form-group">
+          <label for="ad">Bayi Adı</label>
+          <input type="text" id="ad" placeholder="Şirket / Bayi adınız" required>
+        </div>
+
+        <div class="form-group">
+          <label for="sifre">Şifre Belirleyin</label>
+          <input type="password" id="sifre" placeholder="En az 6 karakter" required minlength="6">
+        </div>
+
+        <div class="form-group">
+          <label for="sifre-tekrar">Şifre Tekrar</label>
+          <input type="password" id="sifre-tekrar" placeholder="Şifrenizi tekrar girin" required>
+        </div>
+
+        <div class="section-title">Doğtaş API Bilgileri</div>
+
+        <div class="form-group">
+          <label for="musteri-no">Müşteri No (CustomerNo)</label>
+          <input type="text" id="musteri-no" placeholder="Örn: 1600703">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="api-user">API Kullanıcı Adı</label>
+            <input type="text" id="api-user" placeholder="userName">
+          </div>
+          <div class="form-group">
+            <label for="api-pass">API Şifre</label>
+            <input type="password" id="api-pass" placeholder="password">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="client-id">Client ID</label>
+            <input type="text" id="client-id" placeholder="clientId">
+          </div>
+          <div class="form-group">
+            <label for="client-secret">Client Secret</label>
+            <input type="password" id="client-secret" placeholder="clientSecret">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="app-code">Uygulama Kodu</label>
+          <input type="text" id="app-code" placeholder="applicationCode">
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="kayit-btn">Hesabı Oluştur</button>
+        <p class="kayit-hata" id="kayit-hata"></p>
+      </form>
+
+      <div class="kayit-link">
+        Zaten hesabınız var mı? <a href="/giris">Giriş yapın</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Zaten giriş yapılmışsa yönlendir
+    if (localStorage.getItem('hgo_token')) {
+      window.location.href = '/';
+    }
+
+    document.getElementById('kayit-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('kayit-btn');
+      const hataEl = document.getElementById('kayit-hata');
+      hataEl.style.display = 'none';
+
+      const sifre = document.getElementById('sifre').value;
+      const sifreTekrar = document.getElementById('sifre-tekrar').value;
+
+      if (sifre !== sifreTekrar) {
+        hataEl.textContent = 'Şifreler eşleşmiyor';
+        hataEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Hesap oluşturuluyor...';
+
+      try {
+        const res = await fetch('/api/auth/kayit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            eposta: document.getElementById('eposta').value,
+            sifre: sifre,
+            ad: document.getElementById('ad').value,
+            dogtas_musteri_no: document.getElementById('musteri-no').value.trim() || null,
+            dogtas_kullanici_adi: document.getElementById('api-user').value.trim() || null,
+            dogtas_sifre: document.getElementById('api-pass').value || null,
+            dogtas_client_id: document.getElementById('client-id').value.trim() || null,
+            dogtas_client_secret: document.getElementById('client-secret').value || null,
+            dogtas_uygulama_kodu: document.getElementById('app-code').value.trim() || null
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.hata || 'Kayıt başarısız');
+        }
+
+        localStorage.setItem('hgo_token', data.token);
+        localStorage.setItem('hgo_kullanici', JSON.stringify(data.kullanici));
+        window.location.href = '/';
+      } catch (err) {
+        hataEl.textContent = err.message;
+        hataEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Hesabı Oluştur';
+      }
+    });
+  </script>
+</body>
+</html>

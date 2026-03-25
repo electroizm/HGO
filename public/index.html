@@ -46,6 +46,20 @@
       color: #dc2626;
       border-color: #dc2626;
     }
+    .user-name { cursor: pointer; }
+    .user-name:hover { color: #3b82f6; text-decoration: underline; }
+    /* Profil overlay */
+    .profil-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4); z-index: 999;
+      display: flex; justify-content: center; align-items: flex-start;
+      padding-top: 60px;
+    }
+    .profil-panel {
+      background: #fff; border-radius: 12px; padding: 28px;
+      width: 100%; max-width: 560px; max-height: 80vh; overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
     /* Admin panel */
     .kullanici-liste { list-style: none; }
     .kullanici-liste li {
@@ -75,7 +89,7 @@
           <p class="subtitle">Hedef Gerçekleşme Oranı — Prim Hesaplama</p>
         </div>
         <div class="user-info">
-          <span class="user-name" id="user-name"></span>
+          <span class="user-name" id="user-name" onclick="profilAc()"></span>
           <span class="user-role" id="user-role"></span>
           <button class="btn-cikis" onclick="cikisYap()">Çıkış</button>
         </div>
@@ -224,61 +238,17 @@
     <!-- TAB 3: Kullanıcı Yönetimi (Admin) -->
     <div id="tab-admin" class="tab-content">
       <div class="card">
-        <h2>Yeni Kullanıcı Ekle</h2>
-        <div class="admin-form" id="kullanici-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Ad</label>
-              <input type="text" id="k-ad" placeholder="Bayi Adı">
-            </div>
-            <div class="form-group">
-              <label>E-posta</label>
-              <input type="email" id="k-eposta" placeholder="ornek@email.com">
-            </div>
-            <div class="form-group">
-              <label>Şifre</label>
-              <input type="password" id="k-sifre" placeholder="Şifre">
-            </div>
+        <h2>Kullanıcı Davet Et</h2>
+        <p style="font-size:0.85rem;color:#6b7280;margin-bottom:16px;">
+          E-posta adresi girin. Kullanıcı kayıt sayfasından şifresini belirleyip kendi bilgilerini girecektir.
+        </p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>E-posta</label>
+            <input type="email" id="k-eposta" placeholder="ornek@email.com">
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Rol</label>
-              <select id="k-rol">
-                <option value="bayi">Bayi</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Müşteri No</label>
-              <input type="text" id="k-musteri-no" placeholder="CustomerNo">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>API Kullanıcı Adı</label>
-              <input type="text" id="k-api-user" placeholder="userName">
-            </div>
-            <div class="form-group">
-              <label>API Şifre</label>
-              <input type="password" id="k-api-pass" placeholder="password">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Client ID</label>
-              <input type="text" id="k-client-id" placeholder="clientId">
-            </div>
-            <div class="form-group">
-              <label>Client Secret</label>
-              <input type="password" id="k-client-secret" placeholder="clientSecret">
-            </div>
-            <div class="form-group">
-              <label>Uygulama Kodu</label>
-              <input type="text" id="k-app-code" placeholder="applicationCode">
-            </div>
-          </div>
-          <div class="button-row">
-            <button id="btn-kullanici-ekle" class="btn btn-primary">Kullanıcı Ekle</button>
+          <div class="form-group" style="display:flex;align-items:flex-end;">
+            <button id="btn-kullanici-ekle" class="btn btn-primary" style="width:100%;">Davet Et</button>
           </div>
         </div>
       </div>
@@ -288,6 +258,67 @@
         <ul class="kullanici-liste" id="kullanici-liste">
           <!-- JS ile doldurulacak -->
         </ul>
+      </div>
+    </div>
+
+    <!-- Profil Paneli (Overlay) -->
+    <div id="profil-overlay" class="profil-overlay hidden" onclick="profilKapat(event)">
+      <div class="profil-panel" onclick="event.stopPropagation()">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <h2 style="margin:0;border:none;padding:0;">Profil Ayarları</h2>
+          <button onclick="profilKapat()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#6b7280;">&times;</button>
+        </div>
+        <div class="admin-form">
+          <div class="form-group">
+            <label>Ad</label>
+            <input type="text" id="p-ad">
+          </div>
+          <div class="form-group">
+            <label>E-posta</label>
+            <input type="email" id="p-eposta" disabled>
+          </div>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+          <h3 style="font-size:0.9rem;color:#374151;margin-bottom:12px;">Şifre Değiştir</h3>
+          <div class="form-group">
+            <label>Yeni Şifre</label>
+            <input type="password" id="p-yeni-sifre" placeholder="Boş bırakırsan değişmez">
+          </div>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+          <h3 style="font-size:0.9rem;color:#374151;margin-bottom:12px;">Doğtaş API Bilgileri</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Müşteri No</label>
+              <input type="text" id="p-musteri-no">
+            </div>
+            <div class="form-group">
+              <label>API Kullanıcı Adı</label>
+              <input type="text" id="p-api-user">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>API Şifre</label>
+              <input type="password" id="p-api-pass" placeholder="Değiştirmek için girin">
+            </div>
+            <div class="form-group">
+              <label>Client ID</label>
+              <input type="text" id="p-client-id">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Client Secret</label>
+              <input type="password" id="p-client-secret" placeholder="Değiştirmek için girin">
+            </div>
+            <div class="form-group">
+              <label>Uygulama Kodu</label>
+              <input type="text" id="p-app-code">
+            </div>
+          </div>
+          <div class="button-row">
+            <button id="btn-profil-kaydet" class="btn btn-primary" onclick="profilKaydet()">Kaydet</button>
+          </div>
+        </div>
       </div>
     </div>
 

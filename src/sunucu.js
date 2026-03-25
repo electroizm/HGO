@@ -35,9 +35,13 @@ uygulama.use('/api/hedefler', yetkilendirme, hedeflerRotalari);
 uygulama.use('/api/ek-prim-dilimleri', yetkilendirme, ekPrimRotalari);
 uygulama.use('/api/hesapla', yetkilendirme, hesaplamaRotalari);
 
-// Giriş sayfası
+// Giriş ve kayıt sayfaları
 uygulama.get('/giris', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/giris.html'));
+});
+
+uygulama.get('/kayit', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/kayit.html'));
 });
 
 // SPA fallback

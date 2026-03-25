@@ -16,13 +16,14 @@ async function kullanicilariYukle() {
       <li>
         <div class="kullanici-bilgi">
           <div class="isim">${k.ad}</div>
-          <div class="eposta">${k.eposta} &mdash; <span class="${k.aktif ? 'badge-aktif' : 'badge-pasif'}">${k.aktif ? 'Aktif' : 'Pasif'}</span></div>
-          ${k.dogtas_musteri_no ? `<div class="musteri-no">Müşteri No: ${k.dogtas_musteri_no}</div>` : ''}
+          <div class="eposta">${k.eposta}</div>
+          ${k.dogtas_musteri_no ? `<div class="musteri-no">Müşteri No: ${k.dogtas_musteri_no}</div>` : '<div class="musteri-no" style="color:#ea580c;">API bilgileri henüz girilmemiş</div>'}
         </div>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="${k.aktif ? 'badge-aktif' : 'badge-pasif'}">${k.aktif ? 'Aktif' : 'Pasif'}</span>
           ${k.aktif
-            ? `<button class="btn btn-danger" onclick="kullaniciPasifYap('${k.id}')">Pasif Yap</button>`
-            : `<button class="btn btn-secondary" style="padding:6px 12px;font-size:0.8rem;" onclick="kullaniciAktifYap('${k.id}')">Aktif Yap</button>`
+            ? `<button class="btn btn-danger" onclick="kullaniciDurumDegistir('${k.id}', false)">Pasif Yap</button>`
+            : `<button class="btn btn-secondary" style="padding:6px 12px;font-size:0.8rem;" onclick="kullaniciDurumDegistir('${k.id}', true)">Aktif Yap</button>`
           }
         </div>
       </li>
@@ -32,31 +33,22 @@ async function kullanicilariYukle() {
   }
 }
 
-async function kullaniciEkle() {
-  const ad = document.getElementById('k-ad').value.trim();
+async function kullaniciDavetEt() {
   const eposta = document.getElementById('k-eposta').value.trim();
-  const sifre = document.getElementById('k-sifre').value;
 
-  if (!ad || !eposta || !sifre) {
-    bildirimGoster('Ad, e-posta ve şifre zorunlu', 'hata');
+  if (!eposta) {
+    bildirimGoster('E-posta adresi gerekli', 'hata');
     return;
   }
+
+  const btn = document.getElementById('btn-kullanici-ekle');
+  btn.disabled = true;
+  btn.textContent = 'Davet ediliyor...';
 
   try {
     const res = await apiFetch('/api/kullanicilar', {
       method: 'POST',
-      body: JSON.stringify({
-        ad,
-        eposta,
-        sifre,
-        rol: document.getElementById('k-rol').value,
-        dogtas_musteri_no: document.getElementById('k-musteri-no').value.trim() || null,
-        dogtas_kullanici_adi: document.getElementById('k-api-user').value.trim() || null,
-        dogtas_sifre: document.getElementById('k-api-pass').value || null,
-        dogtas_client_id: document.getElementById('k-client-id').value.trim() || null,
-        dogtas_client_secret: document.getElementById('k-client-secret').value || null,
-        dogtas_uygulama_kodu: document.getElementById('k-app-code').value.trim() || null
-      })
+      body: JSON.stringify({ eposta })
     });
 
     if (!res) return;
@@ -67,40 +59,28 @@ async function kullaniciEkle() {
       return;
     }
 
-    bildirimGoster(`${data.ad} kullanıcısı oluşturuldu`, 'basarili');
-
-    // Formu temizle
-    ['k-ad', 'k-eposta', 'k-sifre', 'k-musteri-no', 'k-api-user', 'k-api-pass', 'k-client-id', 'k-client-secret', 'k-app-code'].forEach(id => {
-      document.getElementById(id).value = '';
-    });
-
+    bildirimGoster(`${eposta} davet edildi`, 'basarili');
+    document.getElementById('k-eposta').value = '';
     kullanicilariYukle();
   } catch (err) {
-    bildirimGoster('Kullanıcı oluşturma hatası: ' + err.message, 'hata');
+    bildirimGoster('Davet hatası: ' + err.message, 'hata');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Davet Et';
   }
 }
 
-async function kullaniciPasifYap(id) {
+async function kullaniciDurumDegistir(id, aktif) {
   try {
-    const res = await apiFetch(`/api/kullanicilar/${id}`, {
-      method: 'DELETE'
-    });
-    if (!res) return;
-    bildirimGoster('Kullanıcı pasif yapıldı', 'basarili');
-    kullanicilariYukle();
-  } catch (err) {
-    bildirimGoster('Hata: ' + err.message, 'hata');
-  }
-}
+    const method = aktif ? 'PUT' : 'DELETE';
+    const url = `/api/kullanicilar/${id}`;
+    const options = aktif
+      ? { method: 'PUT', body: JSON.stringify({ aktif: true }) }
+      : { method: 'DELETE' };
 
-async function kullaniciAktifYap(id) {
-  try {
-    const res = await apiFetch(`/api/kullanicilar/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ aktif: true })
-    });
+    const res = await apiFetch(url, options);
     if (!res) return;
-    bildirimGoster('Kullanıcı aktif yapıldı', 'basarili');
+    bildirimGoster(aktif ? 'Kullanıcı aktif yapıldı' : 'Kullanıcı pasif yapıldı', 'basarili');
     kullanicilariYukle();
   } catch (err) {
     bildirimGoster('Hata: ' + err.message, 'hata');
@@ -110,5 +90,5 @@ async function kullaniciAktifYap(id) {
 // Event listener
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('btn-kullanici-ekle');
-  if (btn) btn.addEventListener('click', kullaniciEkle);
+  if (btn) btn.addEventListener('click', kullaniciDavetEt);
 });

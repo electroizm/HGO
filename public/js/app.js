@@ -411,3 +411,89 @@ function bildirimGoster(mesaj, tip) {
   el.classList.remove('hidden');
   setTimeout(() => el.classList.add('hidden'), 3000);
 }
+
+// === Profil Paneli ===
+async function profilAc() {
+  try {
+    const res = await apiFetch('/api/auth/profil');
+    if (!res) return;
+    const profil = await res.json();
+
+    document.getElementById('p-ad').value = profil.ad || '';
+    document.getElementById('p-eposta').value = profil.eposta || '';
+    document.getElementById('p-yeni-sifre').value = '';
+    document.getElementById('p-musteri-no').value = profil.dogtas_musteri_no || '';
+    document.getElementById('p-api-user').value = profil.dogtas_kullanici_adi || '';
+    document.getElementById('p-api-pass').value = '';
+    document.getElementById('p-client-id').value = profil.dogtas_client_id || '';
+    document.getElementById('p-client-secret').value = '';
+    document.getElementById('p-app-code').value = profil.dogtas_uygulama_kodu || '';
+
+    document.getElementById('profil-overlay').classList.remove('hidden');
+  } catch (err) {
+    bildirimGoster('Profil yüklenemedi', 'hata');
+  }
+}
+
+function profilKapat(event) {
+  if (!event || event.target === document.getElementById('profil-overlay')) {
+    document.getElementById('profil-overlay').classList.add('hidden');
+  }
+}
+
+async function profilKaydet() {
+  const btn = document.getElementById('btn-profil-kaydet');
+  btn.disabled = true;
+  btn.textContent = 'Kaydediliyor...';
+
+  try {
+    const body = {
+      ad: document.getElementById('p-ad').value.trim(),
+      dogtas_musteri_no: document.getElementById('p-musteri-no').value.trim() || null,
+      dogtas_kullanici_adi: document.getElementById('p-api-user').value.trim() || null,
+      dogtas_client_id: document.getElementById('p-client-id').value.trim() || null,
+      dogtas_uygulama_kodu: document.getElementById('p-app-code').value.trim() || null
+    };
+
+    // Şifre alanları sadece doldurulmuşsa gönder
+    const yeniSifre = document.getElementById('p-yeni-sifre').value;
+    if (yeniSifre) body.yeni_sifre = yeniSifre;
+
+    const apiPass = document.getElementById('p-api-pass').value;
+    if (apiPass) body.dogtas_sifre = apiPass;
+
+    const clientSecret = document.getElementById('p-client-secret').value;
+    if (clientSecret) body.dogtas_client_secret = clientSecret;
+
+    const res = await apiFetch('/api/auth/profil', {
+      method: 'PUT',
+      body: JSON.stringify(body)
+    });
+
+    if (!res) return;
+    const data = await res.json();
+
+    if (!res.ok) {
+      bildirimGoster(data.hata || 'Güncelleme hatası', 'hata');
+      return;
+    }
+
+    // localStorage'daki kullanıcı bilgisini güncelle
+    const kullanici = getKullanici();
+    if (kullanici) {
+      kullanici.ad = data.ad;
+      kullanici.dogtas_musteri_no = data.dogtas_musteri_no;
+      kullanici.dogtas_kullanici_adi = data.dogtas_kullanici_adi;
+      setKullanici(kullanici);
+      document.getElementById('user-name').textContent = data.ad;
+    }
+
+    bildirimGoster('Profil güncellendi', 'basarili');
+    profilKapat();
+  } catch (err) {
+    bildirimGoster('Güncelleme hatası: ' + err.message, 'hata');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Kaydet';
+  }
+}
