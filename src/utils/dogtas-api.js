@@ -63,7 +63,7 @@ async function fetchData(startDate, endDate, kimlikBilgileri) {
       referenceDocumentNo: '',
       SalesDocumentType: ''
     }),
-    signal: AbortSignal.timeout(30000)
+    signal: AbortSignal.timeout(60000)
   });
 
   if (!res.ok) throw new Error(`API yanıt kodu: ${res.status}`);
